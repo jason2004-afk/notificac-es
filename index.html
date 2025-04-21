@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerador de Notificação</title>
+  <style>
+    body {
+      background-color: #eeeee8;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    .formulario {
+      max-width: 400px;
+      margin: 0 auto 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input, select, button {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #8000ff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #5f00cc;
+    }
+
+    .notificacao {
+      display: none;
+      background-color: #f4f4e9;
+      padding: 16px;
+      border-radius: 12px;
+      max-width: 400px;
+      margin: 0 auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      animation: aparecer 0.3s ease-in-out;
+    }
+
+    @keyframes aparecer {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cabecalho {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #444;
+      margin-bottom: 6px;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .titulo {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: #000;
+    }
+
+    .mensagem {
+      font-size: 14px;
+      color: #333;
+    }
+
+    .botoes {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .botoes button {
+      background: #efefea;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .botoes button:hover {
+      background: #dddcd7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="formulario">
+    <select id="bancoSelecionado">
+      <option value="nubank">Nubank</option>
+      <option value="inter">Banco Inter</option>
+      <option value="will">Will Bank</option>
+      <option value="mercado">Mercado Pago</option>
+      <option value="picpay">PicPay</option>
+      <option value="bradesco">Bradesco</option>
+    </select>
+    <input type="text" id="valor" placeholder="Valor (ex: R$ 0,01)" value="R$ 0,01" />
+    <button onclick="gerarNotificacao()">Gerar Notificação</button>
+  </div>
+
+  <div class="notificacao" id="notificacao">
+    <div class="cabecalho">
+      <img src="" class="logo" id="logoBanco" alt="logo"/>
+      <div id="appInfo">Nubank • agora</div>
+    </div>
+    <div class="titulo">Transferência recebida</div>
+    <div class="mensagem" id="mensagem">Recebemos sua transferência de R$ 0,01.</div>
+      
+  </div>
+
+  <script>
+    const logos = {
+      nubank: {
+        nome: "Nubank",
+        url: "https://th.bing.com/th/id/OIP.CeQVZYjD1ZxK5CXEh8PtrwHaHZ?w=2400&h=2399&rs=1&pid=ImgDetMain"
+      },
+      inter: {
+        nome: "Banco Inter",
+        url: "https://images.seeklogo.com/logo-png/51/1/banco-inter-logo-png_seeklogo-516118.png"
+      },
+      will: {
+        nome: "Will Bank",
+        url: "https://th.bing.com/th/id/OIP.PJo8ONCSGJIr9Adg5nvX9QHaHa?rs=1&pid=ImgDetMain"
+      },
+      mercado: {
+        nome: "Mercado Pago",
+        url: "https://logospng.org/download/mercado-pago/logo-mercado-pago-icone-512.png"
+      },
+      picpay: {
+        nome: "PicPay",
+        url: "https://logospng.org/download/picpay/logo-picpay-1024.png"
+      },
+      bradesco: {
+        nome: "Bradesco",
+        url: "https://logospng.org/download/bradesco/logo-bradesco-escudo-1024.png"
+      }
+    };
+
+    // Função para solicitar permissão e gerar notificação real
+    function gerarNotificacaoReal(titulo, mensagem, iconeUrl) {
+      if (Notification.permission === "granted") {
+        new Notification(titulo, {
+          body: mensagem,
+          icon: iconeUrl
+        });
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            new Notification(titulo, {
+              body: mensagem,
+              icon: iconeUrl
+            });
+          }
+        });
+      }
+    }
+
+    function gerarNotificacao() {
+      const bancoKey = document.getElementById('bancoSelecionado').value;
+      const valor = document.getElementById('valor').value;
+
+      const banco = logos[bancoKey];
+      document.getElementById('appInfo').innerText = `${banco.nome} • agora`;
+      document.getElementById('logoBanco').src = banco.url;
+      document.getElementById('logoBanco').alt = banco.nome;
+      document.getElementById('mensagem').innerText = `Recebemos sua transferência de ${valor}.`;
+
+      document.getElementById('notificacao').style.display = 'block';
+
+      // Gerar a notificação real
+      gerarNotificacaoReal("Transferência Recebida", `Recebemos sua transferência de ${valor}.`, banco.url);
+    }
+  </script>
+
+</body>
+</html>
